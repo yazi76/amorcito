@@ -157,6 +157,54 @@
             color: var(--text-muted);
             font-style: italic;
         }
+
+        /* Estilos para el formulario de agregar */
+        .add-form-container {
+            background-color: #f8fafc;
+            padding: 1.5rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+        .add-form {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            align-items: flex-end;
+        }
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+            min-width: 150px;
+        }
+        .form-group label {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            margin-bottom: 0.25rem;
+        }
+        .form-group input {
+            padding: 0.6rem;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            outline: none;
+        }
+        .form-group input:focus {
+            border-color: var(--primary-color);
+        }
+        .btn-add {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 0.6rem 1.2rem;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: background-color 0.2s;
+            height: 38px;
+        }
+        .btn-add:hover {
+            background-color: var(--primary-hover);
+        }
     </style>
 </head>
 <body>
@@ -171,6 +219,29 @@
                 </svg>
                 <input type="text" id="searchInput" placeholder="Buscar paciente, clínica...">
             </div>
+        </div>
+
+        <!-- Nuevo formulario para agregar pacientes -->
+        <div class="add-form-container">
+            <form class="add-form" id="addPatientForm">
+                <div class="form-group">
+                    <label for="inputPaciente">Paciente</label>
+                    <input type="text" id="inputPaciente" required placeholder="Ej: Apellido, Nombre">
+                </div>
+                <div class="form-group">
+                    <label for="inputClinica">Clínica</label>
+                    <input type="text" id="inputClinica" required placeholder="Ej: San Juan">
+                </div>
+                <div class="form-group">
+                    <label for="inputDoctor">Doctor</label>
+                    <input type="text" id="inputDoctor" required placeholder="Ej: Pérez">
+                </div>
+                <div class="form-group">
+                    <label for="inputPadecimiento">Padecimiento</label>
+                    <input type="text" id="inputPadecimiento" required placeholder="Ej: Asma">
+                </div>
+                <button type="submit" class="btn-add">Agregar</button>
+            </form>
         </div>
 
         <div class="table-container">
@@ -192,7 +263,7 @@
 
     <script>
         // 1. Definimos los datos iniciales extraídos de la imagen
-        const dataOriginal = [
+        const defaultData = [
             { paciente: "Castro, María", clinica: "Los Santos", doctor: "Quiroz", padecimiento: "Asma" },
             { paciente: "Castro, Rosa", clinica: "Paitilla", doctor: "Solís", padecimiento: "Bronquitis" },
             { paciente: "Mendieta, José", clinica: "Nacional", doctor: "Russell", padecimiento: "Asma" },
@@ -209,6 +280,9 @@
             { paciente: "Zambrano, Karla", clinica: "Nacional", doctor: "Carica", padecimiento: "Asma" }
         ];
 
+        // Intentar cargar datos guardados previamente en el navegador, si no hay, usar los por defecto
+        let dataOriginal = JSON.parse(localStorage.getItem('pacientes_data')) || defaultData;
+
         // Variables de estado
         let datosActuales = [...dataOriginal];
         let columnaOrdenActual = null;
@@ -217,6 +291,7 @@
         // Referencias a elementos del DOM
         const tableBody = document.getElementById('tableBody');
         const searchInput = document.getElementById('searchInput');
+        const addPatientForm = document.getElementById('addPatientForm');
 
         // 2. Función para renderizar (dibujar) la tabla en el HTML
         function renderizarTabla(datos) {
@@ -292,6 +367,42 @@
             } else {
                 renderizarTabla(datosActuales);
             }
+        });
+
+        // Manejar el formulario para agregar un nuevo paciente
+        addPatientForm.addEventListener('submit', (e) => {
+            e.preventDefault(); // Evitar que la página se recargue
+
+            // Crear el nuevo objeto con los valores de los inputs
+            const nuevoPaciente = {
+                paciente: document.getElementById('inputPaciente').value,
+                clinica: document.getElementById('inputClinica').value,
+                doctor: document.getElementById('inputDoctor').value,
+                padecimiento: document.getElementById('inputPadecimiento').value
+            };
+
+            // 1. Agregar al arreglo original
+            dataOriginal.push(nuevoPaciente);
+            
+            // 2. Guardar en el almacenamiento local del navegador
+            localStorage.setItem('pacientes_data', JSON.stringify(dataOriginal));
+
+            // 3. Actualizar la vista de la tabla
+            datosActuales = [...dataOriginal];
+            
+            // Si había una búsqueda activa, la limpiamos
+            searchInput.value = '';
+            
+            // Re-renderizamos conservando el ordenamiento si existía
+            if (columnaOrdenActual) {
+                ordenAscendente = !ordenAscendente; 
+                handleSort(columnaOrdenActual);
+            } else {
+                renderizarTabla(datosActuales);
+            }
+
+            // Limpiar los campos del formulario
+            addPatientForm.reset();
         });
 
         // 5. Inicializar la tabla al cargar la página
