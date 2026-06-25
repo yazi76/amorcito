@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Datos de Pacientes</title>
+    <style>
+        /* Variables de CSS para mantener consistencia en los colores y diseño */
+        :root {
+            --primary-color: #2563eb;
+            --primary-hover: #1d4ed8;
+            --bg-color: #f1f5f9;
+            --card-bg: #ffffff;
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+            --border-color: #e2e8f0;
+            --row-hover: #f8fafc;
+            --row-alt: #fbfcfd;
+        }
+
+        /* Reseteo básico y configuración de fuentes */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            padding: 2rem 1rem;
+            display: flex;
+            justify-content: center;
+        }
+
+        /* Contenedor principal estilo tarjeta */
+        .container {
+            width: 100%;
+            max-width: 1000px;
+            background-color: var(--card-bg);
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Cabecera de la aplicación */
+        .header {
+            padding: 1.5rem 2rem;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        @media (min-width: 640px) {
+            .header {
+                flex-direction: row;
+                justify-content: space-between;
+                align-items: center;
+            }
+        }
+
+        .header h1 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+
+        /* Estilos del buscador */
+        .search-box {
+            position: relative;
+            width: 100%;
+            max-width: 300px;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 0.6rem 1rem 0.6rem 2.5rem;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            outline: none;
+            font-size: 0.95rem;
+            transition: all 0.2s ease;
+        }
+
+        .search-box input:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+
+        .search-box svg {
+            position: absolute;
+            left: 0.75rem;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 1.2rem;
+            height: 1.2rem;
+            fill: var(--text-muted);
+        }
+
+        /* Contenedor responsivo para la tabla */
+        .table-container {
+            overflow-x: auto;
+            width: 100%;
+        }
+
+        /* Estilos de la tabla */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+            min-width: 600px; /* Evita que la tabla se encoja demasiado en móviles */
+        }
+
+        th, td {
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        th {
+            background-color: var(--bg-color);
+            font-weight: 600;
+            color: var(--text-main);
+            cursor: pointer;
+            user-select: none;
+            transition: background-color 0.2s;
+            white-space: nowrap;
+        }
+
+        th:hover {
+            background-color: #e2e8f0;
+        }
+
+        /* Icono de ordenamiento en los encabezados */
+        .sort-icon {
+            display: inline-block;
+            margin-left: 0.5rem;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        tbody tr:nth-child(even) {
+            background-color: var(--row-alt);
+        }
+
+        tbody tr:hover {
+            background-color: var(--row-hover);
+        }
+
+        /* Indicador de tabla vacía (sin resultados de búsqueda) */
+        .no-results {
+            text-align: center;
+            padding: 2rem;
+            color: var(--text-muted);
+            font-style: italic;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div class="header">
+            <h1>Registro de Pacientes</h1>
+            <div class="search-box">
+                <!-- Icono de lupa SVG -->
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                    <path d="M10 2a8 8 0 105.293 13.707l5 5a1 1 0 001.414-1.414l-5-5A8 8 0 0010 2zm0 2a6 6 0 110 12 6 6 0 010-12z"/>
+                </svg>
+                <input type="text" id="searchInput" placeholder="Buscar paciente, clínica...">
+            </div>
+        </div>
+
+        <div class="table-container">
+            <table id="patientsTable">
+                <thead>
+                    <tr>
+                        <th onclick="handleSort('paciente')">Paciente <span class="sort-icon" id="icon-paciente">↕</span></th>
+                        <th onclick="handleSort('clinica')">Clínica <span class="sort-icon" id="icon-clinica">↕</span></th>
+                        <th onclick="handleSort('doctor')">Doctor <span class="sort-icon" id="icon-doctor">↕</span></th>
+                        <th onclick="handleSort('padecimiento')">Padecimiento <span class="sort-icon" id="icon-padecimiento">↕</span></th>
+                    </tr>
+                </thead>
+                <tbody id="tableBody">
+                    <!-- Los datos se inyectarán aquí vía JavaScript -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        // 1. Definimos los datos iniciales extraídos de la imagen
+        const dataOriginal = [
+            { paciente: "Castro, María", clinica: "Los Santos", doctor: "Quiroz", padecimiento: "Asma" },
+            { paciente: "Castro, Rosa", clinica: "Paitilla", doctor: "Solís", padecimiento: "Bronquitis" },
+            { paciente: "Mendieta, José", clinica: "Nacional", doctor: "Russell", padecimiento: "Asma" },
+            { paciente: "Nuñez, Juan", clinica: "Los Santos", doctor: "Quiroz", padecimiento: "Autismo" },
+            { paciente: "Ortiz, Jairo", clinica: "San Juan", doctor: "Carica", padecimiento: "Bronquitis" },
+            { paciente: "Pérez, Luz", clinica: "Paitilla", doctor: "Solís", padecimiento: "Autismo" },
+            { paciente: "Peralta, Rosalba", clinica: "San Juan", doctor: "Carica", padecimiento: "Asma" },
+            { paciente: "Ríos, Fabio", clinica: "Nacional", doctor: "Carica", padecimiento: "Autismo" },
+            { paciente: "Solís, Amanda", clinica: "Paitilla", doctor: "Solís", padecimiento: "Bronquitis" },
+            { paciente: "Tejada, Juan", clinica: "Paitilla", doctor: "Solís", padecimiento: "Tiroides" },
+            { paciente: "Torres, Carmen", clinica: "Los Santos", doctor: "Quiroz", padecimiento: "Arritmia" },
+            { paciente: "Vega, Luis", clinica: "Paitilla", doctor: "Solís", padecimiento: "Asma" },
+            { paciente: "Vergara, Jorge", clinica: "San Juan", doctor: "Carica", padecimiento: "Tuberculosis" },
+            { paciente: "Zambrano, Karla", clinica: "Nacional", doctor: "Carica", padecimiento: "Asma" }
+        ];
+
+        // Variables de estado
+        let datosActuales = [...dataOriginal];
+        let columnaOrdenActual = null;
+        let ordenAscendente = true;
+
+        // Referencias a elementos del DOM
+        const tableBody = document.getElementById('tableBody');
+        const searchInput = document.getElementById('searchInput');
+
+        // 2. Función para renderizar (dibujar) la tabla en el HTML
+        function renderizarTabla(datos) {
+            tableBody.innerHTML = ''; // Limpiar tabla actual
+
+            if (datos.length === 0) {
+                tableBody.innerHTML = `<tr><td colspan="4" class="no-results">No se encontraron resultados para la búsqueda.</td></tr>`;
+                return;
+            }
+
+            datos.forEach(fila => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${fila.paciente}</td>
+                    <td>${fila.clinica}</td>
+                    <td>${fila.doctor}</td>
+                    <td><span style="display: inline-block; padding: 2px 8px; background: #e2e8f0; border-radius: 12px; font-size: 0.85em;">${fila.padecimiento}</span></td>
+                `;
+                tableBody.appendChild(tr);
+            });
+        }
+
+        // 3. Función para manejar el ordenamiento al hacer clic en las cabeceras
+        function handleSort(columna) {
+            // Reiniciar todos los iconos
+            document.querySelectorAll('.sort-icon').forEach(icon => icon.textContent = '↕');
+
+            // Determinar dirección del ordenamiento
+            if (columnaOrdenActual === columna) {
+                ordenAscendente = !ordenAscendente;
+            } else {
+                columnaOrdenActual = columna;
+                ordenAscendente = true;
+            }
+
+            // Actualizar icono visual
+            const currentIcon = document.getElementById(`icon-${columna}`);
+            currentIcon.textContent = ordenAscendente ? '↑' : '↓';
+
+            // Ordenar el arreglo de datos
+            datosActuales.sort((a, b) => {
+                let valorA = a[columna].toLowerCase();
+                let valorB = b[columna].toLowerCase();
+                
+                if (valorA < valorB) return ordenAscendente ? -1 : 1;
+                if (valorA > valorB) return ordenAscendente ? 1 : -1;
+                return 0;
+            });
+
+            // Volver a dibujar la tabla
+            renderizarTabla(datosActuales);
+        }
+
+        // 4. Función para manejar la búsqueda en tiempo real
+        searchInput.addEventListener('input', (e) => {
+            const terminoBusqueda = e.target.value.toLowerCase();
+
+            // Filtrar los datos originales comparando el término con todos los campos
+            datosActuales = dataOriginal.filter(item => {
+                return (
+                    item.paciente.toLowerCase().includes(terminoBusqueda) ||
+                    item.clinica.toLowerCase().includes(terminoBusqueda) ||
+                    item.doctor.toLowerCase().includes(terminoBusqueda) ||
+                    item.padecimiento.toLowerCase().includes(terminoBusqueda)
+                );
+            });
+
+            // Si hay un ordenamiento activo, mantenerlo en los resultados de búsqueda
+            if (columnaOrdenActual) {
+                // Truco para forzar el re-ordenamiento invirtiendo temporalmente el booleano
+                ordenAscendente = !ordenAscendente; 
+                handleSort(columnaOrdenActual);
+            } else {
+                renderizarTabla(datosActuales);
+            }
+        });
+
+        // 5. Inicializar la tabla al cargar la página
+        document.addEventListener('DOMContentLoaded', () => {
+            renderizarTabla(datosActuales);
+        });
+
+    </script>
+</body>
+</html>
